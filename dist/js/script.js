@@ -192,7 +192,68 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  setClock('.timer', deadline);
+  setClock('.timer', deadline); //Modal
+
+  const modal = document.querySelector('.modal'),
+        modalTrigger = document.querySelectorAll('[data-modal]'),
+        modalClose = document.querySelector('.modal__close'); //function helper to show modal window
+
+  function showModal(modal) {
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  } //open modal window on trigger
+
+
+  function openModal(modal, triggers) {
+    triggers.forEach(btn => {
+      btn.addEventListener('click', () => {
+        showModal(modal);
+      });
+    });
+  } //close modal window
+  //function helper to close 
+
+
+  function close() {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    clearInterval(timerId); //resest timeouted Modal if user already saw modal
+  }
+
+  function closeModal(modal, closeTrigger) {
+    closeTrigger.addEventListener('click', () => {
+      close();
+    }); //close on outside click of modal dialog
+
+    window.addEventListener('click', e => {
+      if (e.target === modal) {
+        close();
+      }
+    }); //close on Escape button
+
+    document.addEventListener('keydown', e => {
+      //call function only if modal is opened
+      if (e.code === "Escape" && modal.style.display == 'block') {
+        close();
+      }
+    });
+  }
+
+  openModal(modal, modalTrigger);
+  closeModal(modal, modalClose); //show modal after some time
+
+  const timerId = setTimeout(() => {
+    showModal(modal);
+  }, 5000); //show modal after scroll to bottom
+
+  function showModalByScroll() {
+    if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+      showModal(modal);
+      window.removeEventListener('scroll', showModalByScroll);
+    }
+  }
+
+  window.addEventListener('scroll', showModalByScroll);
 });
 
 /***/ })
