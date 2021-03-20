@@ -220,38 +220,28 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    new Menu('img/tabs/vegy.jpg',
-        "vegy",
-        'Меню "Фитнес"',
-        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-        229,
-        'menu__item'
-    ).render();
+    const getCards = async (url) => {
+        const response = await fetch(url);
+        
+        //if error throw error
+        if (!response.ok) {
+            throw new Error(`Could not get data from ${url}. Error: ${response.status}`)
+        }   
+        return await response.json();
+    }
 
-    new Menu('img/tabs/elite.jpg',
-        "elite",
-        'Меню “Премиум”',
-        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-        550,
-        'menu__item'
-    ).render();
-
-    new Menu('img/tabs/post.jpg',
-        "post",
-        'Меню "Постное"',
-        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков. ',
-        430,
-        'menu__item'
-    ).render();
+    getCards('http://localhost:3000/menu')
+    .then(data => {
+        console.log(data)
+        data.forEach(({img, altimg, title, descr, price}) => {
+            new Menu(img, altimg, title, descr, price, 'menu__item').render()
+        })  
+    })
 
 
     //Form Post
 
     const forms = document.querySelectorAll('form');
-
-    forms.forEach(item => {
-        postData(item);
-    })
 
     const message = {
         loading: 'img/spinner/Spinner78px.svg',
@@ -259,8 +249,28 @@ window.addEventListener('DOMContentLoaded', () => {
         error: 'Возникла непредвиденная ошибка, попробуйте позже.'
     }
 
-    //function to post forms
-    function postData(form) {
+    forms.forEach(item => {
+        bindPostData(item);
+    })
+
+
+    //universal function for post data from form
+    const postData = async (url, data) => {
+        const response = await fetch(url , {
+            method: 'POST',
+            headers: {
+                'Content-type' : 'application/json'
+            },
+            body: data
+        });
+
+        return await response.json();
+
+
+    }
+
+    //function to bind event listener on form and process fetch results
+    function bindPostData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             //create spinner while request is in loading stage
@@ -272,22 +282,19 @@ window.addEventListener('DOMContentLoaded', () => {
             //take form info
             const formData = new FormData(form);
             //transform to json
-            const object = {};
-            formData.forEach(function (value, key) {
-                object[key] = value;
-            });
+            //simple method
+            // const object = {};
+            // formData.forEach(function (value, key) {
+            //     object[key] = value;
+            // });
+            
+            //more Advanced method
+            const object = JSON.stringify(Object.fromEntries(formData.entries()));
 
 
             //show thanks modal if success or error message on error
             //and reset form + remove spinner
-            fetch('server.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(object)
-            })
-            .then((response) => response.text())
+            postData('http://localhost:3000/requests', object)
             .then((data) => {
                 console.log(data)
                 showThanksModal(message.success)
