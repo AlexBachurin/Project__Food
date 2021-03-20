@@ -269,31 +269,35 @@ window.addEventListener('DOMContentLoaded', () => {
             spinner.classList.add('spinner');
             form.insertAdjacentElement('afterend', spinner);
 
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-            request.setRequestHeader('Content-type', 'application/json')
+            //take form info
             const formData = new FormData(form);
             //transform to json
             const object = {};
-            formData.forEach(function(value, key){
+            formData.forEach(function (value, key) {
                 object[key] = value;
             });
-            request.send(JSON.stringify(object));
-            
+
+
             //show thanks modal if success or error message on error
             //and reset form + remove spinner
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    showThanksModal(message.success)
-                    spinner.remove();
-                    form.reset();
-                } else {
-                    showThanksModal(message.error);
-                    spinner.remove();
-                    form.reset();
-
-                }
+            fetch('server.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(object)
             })
+            .then((response) => response.text())
+            .then((data) => {
+                console.log(data)
+                showThanksModal(message.success)
+            }).catch(() => {
+                showThanksModal(message.error);
+            }).finally(() => {
+                form.reset();
+                spinner.remove();
+            })
+      
         })
     }
 
