@@ -133,6 +133,13 @@ window.addEventListener('DOMContentLoaded', () => {
         modal.style.display = 'none';
         document.body.style.overflow = '';
         clearInterval(timerId); //resest timeouted Modal if user already saw modal
+        window.removeEventListener('scroll', showModalByScroll); // and remove modal trigger on scroll to bottom
+        //if user closes modal himself then return modal dialog to initial state
+        if (document.querySelector('.modal__thanks')) {
+            document.querySelector('.modal__thanks').remove();
+            document.querySelector('.modal__dialog').classList.remove('hide');
+
+        }
     }
 
     function closeModal(modal, closeTrigger) {
@@ -198,7 +205,7 @@ window.addEventListener('DOMContentLoaded', () => {
             } else {
                 this.classes.forEach(item => menuItem.classList.add(item))
             }
-            
+
             menuItem.innerHTML = `<img src=${this.src} alt=${this.alt}>
             <h3 class="menu__item-subtitle">${this.title}</h3>
             <div class="menu__item-descr">${this.descr}</div>
@@ -236,5 +243,80 @@ window.addEventListener('DOMContentLoaded', () => {
         430,
         'menu__item'
     ).render();
+
+
+    //Form Post
+
+    const forms = document.querySelectorAll('form');
+
+    forms.forEach(item => {
+        postData(item);
+    })
+
+    const message = {
+        loading: 'img/spinner/Spinner78px.svg',
+        success: 'Спасибо! Мы свяжемся с вами как можно быстрее!',
+        error: 'Возникла непредвиденная ошибка, попробуйте позже.'
+    }
+
+    //function to post forms
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            //create spinner while request is in loading stage
+            const spinner = document.createElement('img');
+            spinner.src = message.loading;
+            spinner.classList.add('spinner');
+            form.insertAdjacentElement('afterend', spinner);
+
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+            request.setRequestHeader('Content-type', 'application/json')
+            const formData = new FormData(form);
+            //transform to json
+            const object = {};
+            formData.forEach(function(value, key){
+                object[key] = value;
+            });
+            request.send(JSON.stringify(object));
+            
+            //show thanks modal if success or error message on error
+            //and reset form + remove spinner
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    showThanksModal(message.success)
+                    spinner.remove();
+                    form.reset();
+                } else {
+                    showThanksModal(message.error);
+                    spinner.remove();
+                    form.reset();
+
+                }
+            })
+        })
+    }
+
+    //dynamically add thanks modal
+    function showThanksModal(msg) {
+        const prevModal = document.querySelector('.modal__dialog');
+        prevModal.classList.add('hide');
+        showModal(modal);
+
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog', 'modal__thanks');
+        thanksModal.innerHTML = `
+        <div class="modal__content">
+            <div class="modal__title">${msg}</div>
+        </div>`;
+        modal.append(thanksModal);
+
+        setTimeout(() => {
+            thanksModal.remove();
+            prevModal.classList.remove('hide');
+            close();
+        }, 4000)
+
+    }
 
 })
