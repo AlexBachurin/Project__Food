@@ -2332,7 +2332,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     return await response.json();
-  };
+  }; //dynamically create menu cards that we get from server
+
 
   getCards('http://localhost:3000/menu').then(data => {
     console.log(data);
@@ -2418,7 +2419,39 @@ window.addEventListener('DOMContentLoaded', () => {
       prevModal.classList.remove('hide');
       close();
     }, 4000);
+  } //SLIDER
+
+
+  const sliders = document.querySelectorAll('.offer__slide'),
+        prev = document.querySelector('.offer__slider-prev'),
+        next = document.querySelector('.offer__slider-next');
+  let sliderIndex = 1;
+
+  function showSlide(i) {
+    sliders.forEach(item => {
+      item.style.display = 'none';
+    });
+    sliders[i - 1].style.display = 'block';
   }
+
+  next.addEventListener('click', () => {
+    if (sliderIndex === sliders.length) {
+      sliderIndex = 0;
+    }
+
+    sliderIndex++;
+    showSlide(sliderIndex);
+  });
+  prev.addEventListener('click', () => {
+    sliderIndex--;
+
+    if (sliderIndex < 1) {
+      sliderIndex = sliders.length;
+    }
+
+    showSlide(sliderIndex);
+  });
+  showSlide(sliderIndex);
 });
 
 /***/ })
