@@ -2278,7 +2278,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const timerId = setTimeout(() => {
     showModal(modal);
-  }, 5000); //show modal after scroll to bottom
+  }, 50000); //show modal after scroll to bottom
 
   function showModalByScroll() {
     if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
@@ -2420,18 +2420,37 @@ window.addEventListener('DOMContentLoaded', () => {
       close();
     }, 4000);
   } //SLIDER
+  //Simple Slider
 
 
   const sliders = document.querySelectorAll('.offer__slide'),
         prev = document.querySelector('.offer__slider-prev'),
-        next = document.querySelector('.offer__slider-next');
-  let sliderIndex = 1;
+        next = document.querySelector('.offer__slider-next'),
+        current = document.querySelector('#current'),
+        total = document.querySelector('#total');
+  let sliderIndex = 1; //add zeros to to total slider counter 
+
+  if (sliders.length < 10) {
+    total.textContent = `0${sliders.length}`;
+  } else {
+    total.textContent = `${sliders.length}`;
+  } //function helper to add zeros to current
+
+
+  function plusZeros(num) {
+    if (num < 10) {
+      num = `0${num}`;
+    }
+
+    return num;
+  }
 
   function showSlide(i) {
     sliders.forEach(item => {
       item.style.display = 'none';
     });
     sliders[i - 1].style.display = 'block';
+    current.textContent = `${plusZeros(i)}`;
   }
 
   next.addEventListener('click', () => {
@@ -2451,7 +2470,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
     showSlide(sliderIndex);
   });
-  showSlide(sliderIndex);
+  showSlide(sliderIndex); //More Advanced slider
+  // const sliders = document.querySelectorAll('.offer__slide'),
+  //       prev = document.querySelector('.offer__slider-prev'),
+  //       next = document.querySelector('.offer__slider-next');
+  // let sliderIndex = 1;
 });
 
 /***/ })
