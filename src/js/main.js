@@ -392,6 +392,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //More Advanced slider
     const slides = document.querySelectorAll('.offer__slide'),
+        slider = document.querySelector('.offer__slider'),
         prev = document.querySelector('.offer__slider-prev'),
         next = document.querySelector('.offer__slider-next'),
         current = document.querySelector('#current'),
@@ -424,7 +425,12 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         sliderInner.style.transform = `translateX(-${offset}px)`;
-        current.textContent = `${plusZeros(slideIndex)}`
+        current.textContent = `${plusZeros(slideIndex)}`;
+
+        dotsArr.forEach(dot => {
+            dot.style.opacity = '.5';
+        })
+        dotsArr[slideIndex - 1].style.opacity = '1';
     })
 
     prev.addEventListener('click', () => {
@@ -439,6 +445,10 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         current.textContent = `${plusZeros(slideIndex)}`
         sliderInner.style.transform = `translateX(-${offset}px)`
+        dotsArr.forEach(dot => {
+            dot.style.opacity = '.5';
+        });
+        dotsArr[slideIndex - 1].style.opacity = '1';
     })
 
     //function helper to add zeros to current
@@ -458,7 +468,43 @@ window.addEventListener('DOMContentLoaded', () => {
         current.textContent = `${slideIndex}`;
     }
 
+    //DOTS for slider
+    slider.style.position = "relative";
 
+    const dots = document.createElement('ol'),
+          dotsArr = [];
+    dots.classList.add('carousel-indicators');
+    slider.append(dots);
+
+    //create dots , set Attributes, classes, and append to parent and push to dotsArr so we can easy manipulate them
+    for (let i = 0; i < slides.length; i++) {
+        const dot = document.createElement('li');
+        dot.setAttribute('data-slide-to', i + 1);
+        dot.classList.add('dot');
+        dots.append(dot);
+        if (i === 0) {
+            dot.style.opacity = '1';
+        }
+        dotsArr.push(dot);
+    }
+    //event listeners for dots
+    dotsArr.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            //get Attribute from dot and set it to slideindex and change offset
+            const slideTo = e.target.getAttribute('data-slide-to');
+            slideIndex = slideTo;
+            //Устанавливаем отступ, двигаем слайдер в зависимости от полученного аттрибута
+            offset = +sliderWidth.slice(0, sliderWidth.length - 2) * (slideTo - 1);
+            sliderInner.style.transform = `translateX(-${offset}px)`;
+            //set styles for active dot
+            dotsArr.forEach(dot => {
+                dot.style.opacity = '.5';
+            })
+            dotsArr[slideIndex - 1].style.opacity = '1';
+            //set current slide counter
+            current.textContent = `${plusZeros(slideIndex)}`
+        })
+    })
 
 
 
