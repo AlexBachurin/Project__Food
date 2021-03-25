@@ -5,6 +5,9 @@ const autoprefixer = require("autoprefixer");
 const cleanCSS = require("gulp-clean-css");
 const postcss = require("gulp-postcss");
 const browsersync = require("browser-sync");
+const htmlmin = require('gulp-htmlmin');
+const rename = require("gulp-rename");
+const imagemin = require('gulp-imagemin');
 
 const dist = "./dist";
 
@@ -78,10 +81,12 @@ gulp.task("watch", () => {
 
 gulp.task("build", gulp.parallel("copy-html", "copy-assets", "build-sass", "build-js"));
 
-gulp.task("prod", () => {
+gulp.task("build-prod", () => {
     gulp.src("./src/index.html")
+        .pipe(htmlmin({ collapseWhitespace: true }))
         .pipe(gulp.dest(dist));
     gulp.src("./src/img/**/*.*")
+        .pipe(imagemin())
         .pipe(gulp.dest(dist + "/img"));
     gulp.src("./src/icons/**/*.*")
         .pipe(gulp.dest(dist + "/icons"));
@@ -114,7 +119,11 @@ gulp.task("prod", () => {
         .pipe(gulp.dest(dist + '/js'));
     
     return gulp.src("./src/scss/style.scss")
-        .pipe(sass().on('error', sass.logError))
+        .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
+        .pipe(rename({
+          prefix: "",
+          suffix: ".min"
+        }))
         .pipe(postcss([autoprefixer()]))
         .pipe(cleanCSS())
         .pipe(gulp.dest(dist + '/css'));
